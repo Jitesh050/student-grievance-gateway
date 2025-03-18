@@ -1,26 +1,96 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+import AuthContextProvider from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PageLoading from "./components/PageLoading";
 
-const queryClient = new QueryClient();
+// Lazy load pages for better performance
+const LandingPage = lazy(() => import("./pages/Index"));
+const SignIn = lazy(() => import("./pages/SignIn"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Complaints = lazy(() => import("./pages/Complaints"));
+const NewComplaint = lazy(() => import("./pages/NewComplaint"));
+const ComplaintDetail = lazy(() => import("./pages/ComplaintDetail"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
+const AdminComplaintDetail = lazy(() => import("./pages/admin/AdminComplaintDetail"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthContextProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner position="top-right" />
+        <BrowserRouter>
+          <Suspense fallback={<PageLoading />}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              
+              {/* Protected student routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/complaints" element={
+                <ProtectedRoute>
+                  <Complaints />
+                </ProtectedRoute>
+              } />
+              <Route path="/complaints/new" element={
+                <ProtectedRoute>
+                  <NewComplaint />
+                </ProtectedRoute>
+              } />
+              <Route path="/complaints/:id" element={
+                <ProtectedRoute>
+                  <ComplaintDetail />
+                </ProtectedRoute>
+              } />
+              
+              {/* Protected admin routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/complaints" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminComplaints />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/complaints/:id" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminComplaintDetail />
+                </ProtectedRoute>
+              } />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthContextProvider>
   </QueryClientProvider>
 );
 
