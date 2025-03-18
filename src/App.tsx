@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import AuthContextProvider from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -11,7 +11,8 @@ import PageLoading from "./components/PageLoading";
 
 // Lazy load pages for better performance
 const LandingPage = lazy(() => import("./pages/Index"));
-const SignIn = lazy(() => import("./pages/SignIn"));
+const StudentSignIn = lazy(() => import("./pages/StudentSignIn"));
+const AdminSignIn = lazy(() => import("./pages/AdminSignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Complaints = lazy(() => import("./pages/Complaints"));
@@ -42,8 +43,12 @@ const App = () => (
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
-              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signin" element={<StudentSignIn />} />
+              <Route path="/admin/signin" element={<AdminSignIn />} />
               <Route path="/signup" element={<SignUp />} />
+              
+              {/* Redirect for old routes */}
+              <Route path="/signin" element={<Navigate to="/signin" replace />} />
               
               {/* Protected student routes */}
               <Route path="/dashboard" element={

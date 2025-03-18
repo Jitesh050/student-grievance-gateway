@@ -1,558 +1,361 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminLayout from "@/components/AdminLayout";
+import { getComplaintById, updateComplaint, addComment } from "@/lib/mock-data";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import AdminLayout from "@/components/AdminLayout";
 import StatusBadge from "@/components/StatusBadge";
-import { 
-  getComplaintById, 
-  addCommentToComplaint,
-  updateComplaintStatus
-} from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Complaint, Comment, UserRole } from "@/lib/types";
+import { Complaint, Comment, UserRole, COMPLAINT_STATUS_OPTIONS } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
-  Calendar,
   Clock,
-  MessageSquare,
-  SendHorizonal,
-  ArrowLeft,
-  FileBadge,
-  Building,
+  Tag,
+  School,
   User,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Loader2
+  BookOpen,
+  Flag,
+  Check,
+  X,
+  Loader2,
+  Send,
 } from "lucide-react";
 
 const AdminComplaintDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [assignmentDepartment, setAssignmentDepartment] = useState("");
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch complaint details
-    const fetchComplaintDetails = async () => {
+    const fetchComplaint = async () => {
       setIsLoading(true);
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
         if (id) {
-          const complaintData = getComplaintById(id);
-          
-          if (complaintData) {
-            setComplaint(complaintData);
-          } else {
-            toast.error("Complaint not found");
-            navigate("/admin/complaints");
-          }
+          const data = await getComplaintById(id);
+          setComplaint(data);
+          setSelectedStatus(data.status);
         }
+      } catch (error) {
+        console.error("Error fetching complaint:", error);
+        toast.error("Failed to load complaint details");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchComplaintDetails();
-  }, [id, navigate]);
+    fetchComplaint();
+  }, [id]);
 
-  const handleCommentSubmit = () => {
-    if (!newComment.trim() || !complaint || !user) return;
-    
-    setIsSubmittingComment(true);
-    
+  if (isLoading || !complaint) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const handleUpdateStatus = async () => {
+    if (!user || !complaint) return;
+
+    setIsUpdating(true);
     try {
+      // For "rejected" status, require a reason
+      if (selectedStatus === "rejected" && !rejectReason.trim()) {
+        toast.error("Please provide a reason for rejection");
+        return;
+      }
+
+      const updates = {
+        ...complaint,
+        status: selectedStatus,
+        ...(selectedStatus === "rejected" && { rejectionReason: rejectReason }),
+        ...(selectedStatus === "in-progress" && { assignedTo: user.name }),
+        ...(selectedStatus === "resolved" && { resolvedAt: new Date() }),
+      };
+
+      await updateComplaint(updates);
+      setComplaint(updates);
+      toast.success("Complaint status updated successfully");
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating complaint:", error);
+      toast.error("Failed to update complaint status");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleSubmitComment = async () => {
+    if (!user || !complaint || !newComment.trim()) return;
+
+    setIsSubmittingComment(true);
+    try {
+      // Add comment to the complaint
       const commentData = {
         complaintId: complaint.id,
         userId: user.id,
         userName: user.name,
-        userRole: "admin" as UserRole, // Explicitly type as UserRole
+        userRole: "admin" as UserRole, // Add proper type cast here
         content: newComment,
       };
       
-      // Add the comment
-      const addedComment = addCommentToComplaint(complaint.id, commentData);
-      
-      // Update local state
-      setComplaint({
-        ...complaint,
-        comments: [...complaint.comments, addedComment],
-        updatedAt: new Date(),
-      });
-      
+      const updatedComplaint = await addComment(commentData);
+      setComplaint(updatedComplaint);
       setNewComment("");
       toast.success("Comment added successfully");
     } catch (error) {
+      console.error("Error adding comment:", error);
       toast.error("Failed to add comment");
-      console.error(error);
     } finally {
       setIsSubmittingComment(false);
     }
   };
 
-  const handleStatusUpdate = async (status: Complaint["status"]) => {
-    if (!complaint) return;
-    
-    setIsUpdatingStatus(true);
-    
-    try {
-      let additionalData = {};
-      
-      if (status === "rejected") {
-        if (!rejectionReason.trim()) {
-          toast.error("Please provide a rejection reason");
-          return;
-        }
-        additionalData = { rejectionReason };
-      } else if (status === "in-progress") {
-        if (!assignmentDepartment.trim()) {
-          toast.error("Please specify the department");
-          return;
-        }
-        additionalData = { assignedTo: assignmentDepartment };
-      } else if (status === "resolved") {
-        additionalData = { resolvedAt: new Date() };
-      }
-      
-      const updatedComplaint = updateComplaintStatus(complaint.id, status, additionalData);
-      
-      if (updatedComplaint) {
-        setComplaint(updatedComplaint);
-        toast.success(`Complaint marked as ${status}`);
-        
-        // Add a system comment about the status change
-        const statusChangeComment = {
-          complaintId: complaint.id,
-          userId: user?.id || "system",
-          userName: user?.name || "System",
-          userRole: "admin",
-          content: getStatusChangeMessage(status, additionalData),
-        };
-        
-        addCommentToComplaint(complaint.id, statusChangeComment);
-        
-        // Reset form fields
-        setRejectionReason("");
-        setAssignmentDepartment("");
-      }
-    } catch (error) {
-      toast.error("Failed to update complaint status");
-      console.error(error);
-    } finally {
-      setIsUpdatingStatus(false);
-    }
-  };
-
-  const getStatusChangeMessage = (status: Complaint["status"], additionalData: any) => {
-    switch (status) {
-      case "in-progress":
-        return `This complaint has been assigned to ${additionalData.assignedTo} and is now being processed.`;
-      case "resolved":
-        return "This complaint has been marked as resolved.";
-      case "rejected":
-        return `This complaint has been rejected. Reason: ${additionalData.rejectionReason}`;
-      default:
-        return `Complaint status changed to ${status}.`;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-[70vh]">
-          <div className="animate-pulse space-y-6 w-full max-w-4xl">
-            <div className="h-8 bg-muted rounded w-1/3"></div>
-            <div className="h-32 bg-muted rounded"></div>
-            <div className="h-64 bg-muted rounded"></div>
-          </div>
-        </div>
-      </AdminLayout>
-    );
-  }
-
-  if (!complaint) {
-    return (
-      <AdminLayout>
-        <div className="flex flex-col items-center justify-center h-[70vh]">
-          <AlertCircle className="h-12 w-12 text-muted-foreground" />
-          <h1 className="text-2xl font-bold mt-4">Complaint Not Found</h1>
-          <p className="text-muted-foreground mt-2">
-            The complaint you're looking for doesn't exist.
-          </p>
-          <Button className="mt-6" onClick={() => navigate("/admin/complaints")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Complaints
-          </Button>
-        </div>
-      </AdminLayout>
-    );
-  }
-
-  // Sort comments by most recent first
-  const sortedComments = [...complaint.comments].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
   return (
     <AdminLayout>
-      <div className="max-w-4xl mx-auto">
-        {/* Back button */}
-        <Button
-          variant="ghost"
-          className="mb-6"
-          onClick={() => navigate("/admin/complaints")}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Complaints
-        </Button>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Complaint Details</h1>
+          <p className="text-muted-foreground">
+            View and manage complaint details, update status, and add comments.
+          </p>
+        </div>
 
-        {/* Complaint details */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h1 className="text-2xl font-bold">{complaint.title}</h1>
-            <StatusBadge status={complaint.status} className="text-sm py-1.5 px-3" />
-          </div>
-
-          <div className="glass-card rounded-xl p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="space-y-4">
-                <div className="flex items-center text-sm">
-                  <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Submitted on:</span>
-                  <span className="ml-2 font-medium">
-                    {format(new Date(complaint.createdAt), "MMMM d, yyyy")}
-                  </span>
-                </div>
-                
-                <div className="flex items-center text-sm">
-                  <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Last updated:</span>
-                  <span className="ml-2 font-medium">
-                    {format(new Date(complaint.updatedAt), "MMMM d, yyyy 'at' h:mm a")}
-                  </span>
-                </div>
-                
-                <div className="flex items-center text-sm">
-                  <FileBadge className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Category:</span>
-                  <span className="ml-2 font-medium capitalize">
-                    {complaint.category}
-                  </span>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Complaint Details */}
+          <div className="lg:col-span-2 glass-card rounded-xl p-6">
+            <h2 className="text-xl font-bold mb-4">Complaint Information</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium">Title:</p>
+                <p>{complaint.title}</p>
               </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center text-sm">
-                  <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Submitted by:</span>
-                  <span className="ml-2 font-medium">
-                    {complaint.studentName} ({complaint.studentId})
-                  </span>
-                </div>
-                
-                <div className="flex items-center text-sm">
-                  <Building className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Department:</span>
-                  <span className="ml-2 font-medium">
-                    {complaint.department}
-                  </span>
-                </div>
-                
-                <div className="flex items-center text-sm">
-                  <MessageSquare className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">Priority:</span>
-                  <span 
-                    className={`ml-2 font-medium ${
-                      complaint.priority === 'high' 
-                        ? 'text-red-500' 
-                        : complaint.priority === 'medium' 
-                        ? 'text-amber-500' 
-                        : 'text-green-500'
-                    }`}
-                  >
-                    {complaint.priority.charAt(0).toUpperCase() + complaint.priority.slice(1)}
-                  </span>
-                </div>
+              <div>
+                <p className="text-sm font-medium">Description:</p>
+                <p>{complaint.description}</p>
               </div>
-            </div>
-
-            <Separator className="my-6" />
-
-            <div>
-              <h3 className="text-lg font-medium mb-3">Description</h3>
-              <p className="whitespace-pre-line text-muted-foreground">
-                {complaint.description}
-              </p>
-            </div>
-
-            {complaint.status === "resolved" && complaint.resolvedAt && (
-              <div className="mt-6 bg-green-500/10 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-green-700 dark:text-green-400 mb-2">
-                  Resolved on {format(new Date(complaint.resolvedAt), "MMMM d, yyyy")}
-                </h3>
-                <p className="text-muted-foreground">
-                  This complaint has been successfully resolved.
-                </p>
+              <div>
+                <p className="text-sm font-medium">Category:</p>
+                <p>{complaint.category}</p>
               </div>
-            )}
-
-            {complaint.status === "rejected" && complaint.rejectionReason && (
-              <div className="mt-6 bg-red-500/10 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-red-700 dark:text-red-400 mb-2">
-                  Complaint Rejected
-                </h3>
-                <p className="text-muted-foreground">
-                  {complaint.rejectionReason}
-                </p>
+              <div>
+                <p className="text-sm font-medium">Priority:</p>
+                <p>{complaint.priority}</p>
               </div>
-            )}
-
-            {complaint.status === "in-progress" && complaint.assignedTo && (
-              <div className="mt-6 bg-blue-500/10 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-blue-700 dark:text-blue-400 mb-2">
-                  In Progress
-                </h3>
-                <p className="text-muted-foreground">
-                  This complaint is currently being handled by the {complaint.assignedTo}.
-                </p>
+              <div>
+                <p className="text-sm font-medium">Status:</p>
+                <StatusBadge status={complaint.status} />
               </div>
-            )}
-
-            {/* Action buttons */}
-            <div className="mt-8 flex flex-wrap gap-3">
-              {complaint.status === "pending" && (
-                <>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Clock className="mr-2 h-4 w-4" />
-                        Start Processing
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Assign Complaint</DialogTitle>
-                        <DialogDescription>
-                          Specify which department will handle this complaint.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Department</label>
-                          <Input
-                            placeholder="e.g., IT Department, Academic Affairs"
-                            value={assignmentDepartment}
-                            onChange={(e) => setAssignmentDepartment(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setAssignmentDepartment("")}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={() => handleStatusUpdate("in-progress")}
-                          disabled={isUpdatingStatus || !assignmentDepartment.trim()}
-                        >
-                          {isUpdatingStatus ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Updating...
-                            </>
-                          ) : (
-                            <>Start Processing</>
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="destructive">
-                        <XCircle className="mr-2 h-4 w-4" />
-                        Reject Complaint
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Reject Complaint</DialogTitle>
-                        <DialogDescription>
-                          Please provide a reason for rejecting this complaint.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Rejection Reason</label>
-                          <Textarea
-                            placeholder="Explain why this complaint is being rejected..."
-                            value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
-                            rows={4}
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setRejectionReason("")}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleStatusUpdate("rejected")}
-                          disabled={isUpdatingStatus || !rejectionReason.trim()}
-                        >
-                          {isUpdatingStatus ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Rejecting...
-                            </>
-                          ) : (
-                            <>Reject Complaint</>
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </>
-              )}
-
-              {complaint.status === "in-progress" && (
-                <Button onClick={() => handleStatusUpdate("resolved")}>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Mark as Resolved
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Comments section */}
-          <section className="mb-6">
-            <h2 className="text-xl font-bold mb-4">Comments</h2>
-
-            {/* Add comment */}
-            <div className="glass-card rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-medium mb-4">Add a Comment</h3>
-              <div className="flex items-start gap-4">
-                <Avatar>
-                  <AvatarFallback>
-                    {user?.name?.charAt(0) || "A"}
-                  </AvatarFallback>
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name}`} />
-                </Avatar>
-                <div className="flex-1">
-                  <Textarea
-                    placeholder="Write your comment here..."
-                    className="mb-3"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={handleCommentSubmit}
-                      disabled={!newComment.trim() || isSubmittingComment}
-                    >
-                      {isSubmittingComment ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <SendHorizonal className="mr-2 h-4 w-4" />
-                          Send
-                        </>
-                      )}
-                    </Button>
+              <div>
+                <p className="text-sm font-medium">Submitted By:</p>
+                <div className="flex items-center space-x-2">
+                  <Avatar>
+                    <AvatarFallback>{complaint.studentName.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${complaint.studentName}`} />
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{complaint.studentName}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {complaint.studentId}
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Comments list */}
-            {sortedComments.length > 0 ? (
-              <div className="space-y-4">
-                {sortedComments.map((comment, index) => (
-                  <motion.div
-                    key={comment.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                    className={`glass-card rounded-xl p-4 ${
-                      comment.userRole === "admin" ? "border-l-4 border-primary" : ""
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <Avatar>
-                        <AvatarFallback>
-                          {comment.userName.charAt(0)}
-                        </AvatarFallback>
-                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.userName}`} />
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium">{comment.userName}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {comment.userRole === "admin" ? "Administrator" : "Student"}
-                            </p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(comment.createdAt), "MMM d, yyyy 'at' h:mm a")}
-                          </p>
-                        </div>
-                        <p className="mt-3">{comment.content}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+              <div>
+                <p className="text-sm font-medium">Department:</p>
+                <p>{complaint.department}</p>
               </div>
-            ) : (
-              <div className="glass-card rounded-xl p-6 text-center">
-                <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No comments yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Be the first to leave a comment on this complaint.
+              <div>
+                <p className="text-sm font-medium">Submitted Date:</p>
+                <p>
+                  {format(new Date(complaint.createdAt), "MMM dd, yyyy hh:mm a")}
                 </p>
               </div>
-            )}
-          </section>
-        </motion.div>
-      </div>
+              {complaint.resolvedAt && (
+                <div>
+                  <p className="text-sm font-medium">Resolved Date:</p>
+                  <p>
+                    {format(new Date(complaint.resolvedAt), "MMM dd, yyyy hh:mm a")}
+                  </p>
+                </div>
+              )}
+              {complaint.assignedTo && (
+                <div>
+                  <p className="text-sm font-medium">Assigned To:</p>
+                  <p>{complaint.assignedTo}</p>
+                </div>
+              )}
+              {complaint.rejectionReason && (
+                <div>
+                  <p className="text-sm font-medium">Rejection Reason:</p>
+                  <p>{complaint.rejectionReason}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Status Update */}
+          <div className="glass-card rounded-xl p-6">
+            <h2 className="text-xl font-bold mb-4">Update Status</h2>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  Update Complaint Status
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Update Complaint Status</DialogTitle>
+                  <DialogDescription>
+                    Select the new status for this complaint.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label htmlFor="status" className="text-right">
+                      Status
+                    </label>
+                    <Select
+                      value={selectedStatus}
+                      onValueChange={setSelectedStatus}
+                    >
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select a status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMPLAINT_STATUS_OPTIONS.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {selectedStatus === "rejected" && (
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <label htmlFor="rejectReason" className="text-right">
+                        Rejection Reason
+                      </label>
+                      <Textarea
+                        id="rejectReason"
+                        className="col-span-3"
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="Enter rejection reason"
+                      />
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button type="submit" onClick={handleUpdateStatus} disabled={isUpdating}>
+                    {isUpdating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      "Update Status"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Comments Section */}
+        <div className="glass-card rounded-xl p-6">
+          <h2 className="text-xl font-bold mb-4">Comments</h2>
+          {complaint.comments.length === 0 ? (
+            <p className="text-muted-foreground">No comments yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {complaint.comments.map((comment) => (
+                <div key={comment.id} className="border rounded-md p-4">
+                  <div className="flex items-start space-x-3">
+                    <Avatar>
+                      <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.userName}`} />
+                    </Avatar>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">{comment.userName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(comment.createdAt), "MMM dd, yyyy hh:mm a")}
+                        </p>
+                      </div>
+                      <p className="text-sm">{comment.content}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add Comment Form */}
+          <div className="mt-6">
+            <Textarea
+              placeholder="Add a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            <Button
+              className="mt-2 w-full"
+              onClick={handleSubmitComment}
+              disabled={isSubmittingComment}
+            >
+              {isSubmittingComment ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Add Comment
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </motion.div>
     </AdminLayout>
   );
 };

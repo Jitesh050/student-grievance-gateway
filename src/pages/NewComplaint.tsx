@@ -8,7 +8,7 @@ import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/MainLayout";
 import { addComplaint } from "@/lib/mock-data";
-import { COMPLAINT_CATEGORY_OPTIONS } from "@/lib/types";
+import { COMPLAINT_CATEGORY_OPTIONS, ComplaintCategory } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -84,9 +84,9 @@ const NewComplaint = () => {
       
       // Add the new complaint with required fields (no longer optional)
       const newComplaint = addComplaint({
-        title: values.title,         // Ensure these are not optional
+        title: values.title,
         description: values.description,
-        category: values.category,
+        category: values.category as ComplaintCategory, // Fix the type casting here
         priority: values.priority,
         studentId: user.studentId || "",
         studentName: user.name,
