@@ -1,5 +1,5 @@
 
-import { Complaint, Comment } from './types';
+import { Complaint, Comment, ComplaintStatus } from './types';
 
 // Helper to create past dates
 const daysAgo = (days: number): Date => {
@@ -200,7 +200,7 @@ export const addCommentToComplaint = (complaintId: string, comment: Omit<Comment
 // Update complaint status
 export const updateComplaintStatus = (
   complaintId: string, 
-  status: Complaint['status'], 
+  status: ComplaintStatus, 
   additionalData?: {
     rejectionReason?: string;
     assignedTo?: string;

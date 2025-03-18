@@ -1,9 +1,8 @@
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileText, Shield, ArrowRight } from "lucide-react";
+import { FileText, Shield, ArrowRight, Clock, Check, BookOpen, Flag } from "lucide-react";
 
 const Index = () => {
   const { user } = useAuth();

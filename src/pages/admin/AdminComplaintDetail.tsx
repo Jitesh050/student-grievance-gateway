@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
-import { getComplaintById, updateComplaint, addComment } from "@/lib/mock-data";
+import { getComplaintById, updateComplaintStatus, addCommentToComplaint } from "@/lib/mock-data";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Complaint, Comment, UserRole, COMPLAINT_STATUS_OPTIONS } from "@/lib/types";
+import { Complaint, Comment, UserRole, COMPLAINT_STATUS_OPTIONS, ComplaintStatus } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
@@ -48,7 +49,7 @@ const AdminComplaintDetail = () => {
   const navigate = useNavigate();
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<ComplaintStatus>("pending");
   const [rejectReason, setRejectReason] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -96,18 +97,23 @@ const AdminComplaintDetail = () => {
         return;
       }
 
-      const updates = {
-        ...complaint,
-        status: selectedStatus,
+      const additionalData = {
         ...(selectedStatus === "rejected" && { rejectionReason: rejectReason }),
         ...(selectedStatus === "in-progress" && { assignedTo: user.name }),
         ...(selectedStatus === "resolved" && { resolvedAt: new Date() }),
       };
 
-      await updateComplaint(updates);
-      setComplaint(updates);
-      toast.success("Complaint status updated successfully");
-      setIsDialogOpen(false);
+      const updatedComplaint = await updateComplaintStatus(
+        complaint.id, 
+        selectedStatus, 
+        additionalData
+      );
+      
+      if (updatedComplaint) {
+        setComplaint(updatedComplaint);
+        toast.success("Complaint status updated successfully");
+        setIsDialogOpen(false);
+      }
     } catch (error) {
       console.error("Error updating complaint:", error);
       toast.error("Failed to update complaint status");
@@ -126,14 +132,19 @@ const AdminComplaintDetail = () => {
         complaintId: complaint.id,
         userId: user.id,
         userName: user.name,
-        userRole: "admin" as UserRole, // Add proper type cast here
+        userRole: "admin" as UserRole,
         content: newComment,
       };
       
-      const updatedComplaint = await addComment(commentData);
-      setComplaint(updatedComplaint);
-      setNewComment("");
-      toast.success("Comment added successfully");
+      const newComment = await addCommentToComplaint(complaint.id, commentData);
+      
+      // Refresh the complaint data to include the new comment
+      const updatedComplaint = await getComplaintById(complaint.id);
+      if (updatedComplaint) {
+        setComplaint(updatedComplaint);
+        setNewComment("");
+        toast.success("Comment added successfully");
+      }
     } catch (error) {
       console.error("Error adding comment:", error);
       toast.error("Failed to add comment");
