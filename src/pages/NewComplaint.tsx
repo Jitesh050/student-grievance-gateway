@@ -82,7 +82,7 @@ const NewComplaint = () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Add the new complaint
+      // Add the new complaint with required fields (no longer optional)
       const newComplaint = addComplaint({
         ...values,
         studentId: user.studentId || "",

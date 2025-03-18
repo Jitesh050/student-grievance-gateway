@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -29,8 +28,6 @@ import {
   Bell,
 } from "lucide-react";
 
-<lov-add-dependency>framer-motion@11.0.3</lov-add-dependency>
-
 interface MainLayoutProps {
   children: React.ReactNode;
 }
@@ -51,7 +48,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     }
   };
 
-  // Navigation items for the sidebar
   const navigationItems = [
     {
       title: "Dashboard",
@@ -70,7 +66,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     },
   ];
 
-  // Set page title based on current route
   useEffect(() => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
     let title = "College Complaint System";

@@ -91,7 +91,7 @@ const AdminComplaintDetail = () => {
         complaintId: complaint.id,
         userId: user.id,
         userName: user.name,
-        userRole: user.role,
+        userRole: user.role as "admin", // Cast to the specific union type
         content: newComment,
       };
       
