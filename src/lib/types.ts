@@ -14,12 +14,14 @@ export type ComplaintCategory =
   | 'transport' 
   | 'others';
 
+export type UserRole = 'student' | 'admin';
+
 export interface Comment {
   id: string;
   complaintId: string;
   userId: string;
   userName: string;
-  userRole: 'student' | 'admin';
+  userRole: UserRole;
   content: string;
   createdAt: Date;
 }

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Complaint, Comment } from "@/lib/types";
+import { Complaint, Comment, UserRole } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
@@ -91,7 +91,7 @@ const AdminComplaintDetail = () => {
         complaintId: complaint.id,
         userId: user.id,
         userName: user.name,
-        userRole: user.role as "admin", // Cast to the specific union type
+        userRole: "admin" as UserRole, // Explicitly type as UserRole
         content: newComment,
       };
       

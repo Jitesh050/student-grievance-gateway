@@ -84,7 +84,10 @@ const NewComplaint = () => {
       
       // Add the new complaint with required fields (no longer optional)
       const newComplaint = addComplaint({
-        ...values,
+        title: values.title,         // Ensure these are not optional
+        description: values.description,
+        category: values.category,
+        priority: values.priority,
         studentId: user.studentId || "",
         studentName: user.name,
         department: user.department || "",
