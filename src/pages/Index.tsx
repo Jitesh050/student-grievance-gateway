@@ -7,19 +7,34 @@ import {
   FileText, 
   Shield, 
   ArrowRight, 
-  Clock, 
-  Check, 
-  BookOpen, 
-  Flag 
+  Clock as ClockIcon, 
+  Check as CheckIcon, 
+  BookOpen as BookOpenIcon, 
+  Flag as FlagIcon 
 } from "lucide-react";
-import { 
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
+
+// Simple testimonial component
+const TestimonialCard = ({ testimonial }) => (
+  <Card className="border-0 shadow-md dark:shadow-gray-800/10 bg-gray-50 dark:bg-gray-900 h-full">
+    <CardContent className="p-6">
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <span className="text-lg font-bold text-blue-700 dark:text-blue-300">
+              {testimonial.name.charAt(0)}
+            </span>
+          </div>
+          <div>
+            <h4 className="font-semibold">{testimonial.name}</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.department}</p>
+          </div>
+        </div>
+        <p className="text-gray-600 dark:text-gray-300 italic">"{testimonial.comment}"</p>
+      </div>
+    </CardContent>
+  </Card>
+);
 
 const Index = () => {
   const { user } = useAuth();
@@ -91,7 +106,7 @@ const Index = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full">
-                      <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
+                      <CheckIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">Fast Response</p>
@@ -136,36 +151,12 @@ const Index = () => {
               </p>
             </div>
             
-            <Carousel className="w-full max-w-5xl mx-auto">
-              <CarouselContent>
-                {testimonials.map((testimonial, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 p-1">
-                    <Card className="border-0 shadow-md dark:shadow-gray-800/10 bg-gray-50 dark:bg-gray-900">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col space-y-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                              <span className="text-lg font-bold text-blue-700 dark:text-blue-300">
-                                {testimonial.name.charAt(0)}
-                              </span>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold">{testimonial.name}</h4>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.department}</p>
-                            </div>
-                          </div>
-                          <p className="text-gray-600 dark:text-gray-300 italic">"{testimonial.comment}"</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="flex justify-center mt-6 gap-2">
-                <CarouselPrevious className="static transform-none mx-2" />
-                <CarouselNext className="static transform-none mx-2" />
-              </div>
-            </Carousel>
+            {/* Replaced carousel with a simple grid for testimonials */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {testimonials.map((testimonial, index) => (
+                <TestimonialCard key={index} testimonial={testimonial} />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -252,12 +243,12 @@ const features = [
   {
     title: "Real-time Tracking",
     description: "Track the status of your complaints in real-time",
-    icon: Clock,
+    icon: ClockIcon,
   },
   {
     title: "Quick Resolution",
     description: "Get timely responses and resolutions from administrators",
-    icon: Check,
+    icon: CheckIcon,
   },
   {
     title: "Secure Communication",
@@ -267,12 +258,12 @@ const features = [
   {
     title: "Organized Dashboard",
     description: "View all your complaints in one organized dashboard",
-    icon: BookOpen,
+    icon: BookOpenIcon,
   },
   {
     title: "Priority System",
     description: "Mark complaints as low, medium, or high priority",
-    icon: Flag,
+    icon: FlagIcon,
   },
 ];
 
