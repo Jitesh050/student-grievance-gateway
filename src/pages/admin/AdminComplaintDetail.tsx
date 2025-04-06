@@ -6,16 +6,21 @@ import { getComplaintById, updateComplaintStatus, addCommentToComplaint } from "
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import StatusBadge from "@/components/StatusBadge";
+import {
+  ArrowLeft,
+  MessageSquare,
+  Clock,
+  FileText,
+  Check,
+  X,
+  Shield,
+  Send,
+  AlertTriangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import StatusBadge from "@/components/StatusBadge";
 import {
   Dialog,
   DialogContent,
@@ -31,20 +36,15 @@ import { Complaint, Comment, UserRole, COMPLAINT_STATUS_OPTIONS, ComplaintStatus
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
-  Clock,
-  Tag,
-  School,
-  User,
-  BookOpen,
-  Flag,
-  Check,
-  X,
-  Loader2,
-  Send,
-} from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AdminComplaintDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [complaint, setComplaint] = useState<Complaint | null>(null);
@@ -53,8 +53,8 @@ const AdminComplaintDetail = () => {
   const [rejectReason, setRejectReason] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   useEffect(() => {
     const fetchComplaint = async () => {
@@ -63,7 +63,10 @@ const AdminComplaintDetail = () => {
         if (id) {
           const data = await getComplaintById(id);
           setComplaint(data);
-          setSelectedStatus(data.status);
+          
+          if (data) {
+            setSelectedStatus(data.status);
+          }
         }
       } catch (error) {
         console.error("Error fetching complaint:", error);
@@ -76,24 +79,11 @@ const AdminComplaintDetail = () => {
     fetchComplaint();
   }, [id]);
 
-  if (isLoading || !complaint) {
-    return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </AdminLayout>
-    );
-  }
-
   const handleUpdateStatus = async () => {
-    if (!user || !complaint) return;
-
     setIsUpdating(true);
     try {
-      // For "rejected" status, require a reason
-      if (selectedStatus === "rejected" && !rejectReason.trim()) {
-        toast.error("Please provide a reason for rejection");
+      if (!complaint) {
+        toast.error("Complaint not found");
         return;
       }
 
@@ -122,12 +112,16 @@ const AdminComplaintDetail = () => {
     }
   };
 
-  const handleSubmitComment = async () => {
-    if (!user || !complaint || !newComment.trim()) return;
+  const handleAddComment = async () => {
+    if (!newComment.trim()) {
+      toast.error("Comment cannot be empty");
+      return;
+    }
 
     setIsSubmittingComment(true);
     try {
-      // Add comment to the complaint
+      if (!complaint) return;
+
       const commentData = {
         complaintId: complaint.id,
         userId: user.id,
@@ -136,7 +130,7 @@ const AdminComplaintDetail = () => {
         content: newComment,
       };
       
-      const newComment = await addCommentToComplaint(complaint.id, commentData);
+      await addCommentToComplaint(complaint.id, commentData);
       
       // Refresh the complaint data to include the new comment
       const updatedComplaint = await getComplaintById(complaint.id);
@@ -155,218 +149,235 @@ const AdminComplaintDetail = () => {
 
   return (
     <AdminLayout>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="mb-6">
+      <div className="space-y-6">
+        {/* Back button and title */}
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <h1 className="text-2xl font-bold">Complaint Details</h1>
-          <p className="text-muted-foreground">
-            View and manage complaint details, update status, and add comments.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Complaint Details */}
-          <div className="lg:col-span-2 glass-card rounded-xl p-6">
-            <h2 className="text-xl font-bold mb-4">Complaint Information</h2>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">Title:</p>
-                <p>{complaint.title}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Description:</p>
-                <p>{complaint.description}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Category:</p>
-                <p>{complaint.category}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Priority:</p>
-                <p>{complaint.priority}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Status:</p>
-                <StatusBadge status={complaint.status} />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Submitted By:</p>
-                <div className="flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarFallback>{complaint.studentName.charAt(0)}</AvatarFallback>
-                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${complaint.studentName}`} />
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{complaint.studentName}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {complaint.studentId}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Department:</p>
-                <p>{complaint.department}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Submitted Date:</p>
-                <p>
-                  {format(new Date(complaint.createdAt), "MMM dd, yyyy hh:mm a")}
-                </p>
-              </div>
-              {complaint.resolvedAt && (
-                <div>
-                  <p className="text-sm font-medium">Resolved Date:</p>
-                  <p>
-                    {format(new Date(complaint.resolvedAt), "MMM dd, yyyy hh:mm a")}
-                  </p>
-                </div>
-              )}
-              {complaint.assignedTo && (
-                <div>
-                  <p className="text-sm font-medium">Assigned To:</p>
-                  <p>{complaint.assignedTo}</p>
-                </div>
-              )}
-              {complaint.rejectionReason && (
-                <div>
-                  <p className="text-sm font-medium">Rejection Reason:</p>
-                  <p>{complaint.rejectionReason}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Status Update */}
-          <div className="glass-card rounded-xl p-6">
-            <h2 className="text-xl font-bold mb-4">Update Status</h2>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  Update Complaint Status
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Update Complaint Status</DialogTitle>
-                  <DialogDescription>
-                    Select the new status for this complaint.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label htmlFor="status" className="text-right">
-                      Status
-                    </label>
-                    <Select
-                      value={selectedStatus}
-                      onValueChange={setSelectedStatus}
-                    >
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder="Select a status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COMPLAINT_STATUS_OPTIONS.map((status) => (
-                          <SelectItem key={status.value} value={status.value}>
-                            {status.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {selectedStatus === "rejected" && (
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <label htmlFor="rejectReason" className="text-right">
-                        Rejection Reason
-                      </label>
-                      <Textarea
-                        id="rejectReason"
-                        className="col-span-3"
-                        value={rejectReason}
-                        onChange={(e) => setRejectReason(e.target.value)}
-                        placeholder="Enter rejection reason"
-                      />
-                    </div>
-                  )}
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleUpdateStatus} disabled={isUpdating}>
-                    {isUpdating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Updating...
-                      </>
-                    ) : (
-                      "Update Status"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-
-        <Separator className="my-6" />
-
-        {/* Comments Section */}
-        <div className="glass-card rounded-xl p-6">
-          <h2 className="text-xl font-bold mb-4">Comments</h2>
-          {complaint.comments.length === 0 ? (
-            <p className="text-muted-foreground">No comments yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {complaint.comments.map((comment) => (
-                <div key={comment.id} className="border rounded-md p-4">
-                  <div className="flex items-start space-x-3">
-                    <Avatar>
-                      <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
-                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.userName}`} />
-                    </Avatar>
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium">{comment.userName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(comment.createdAt), "MMM dd, yyyy hh:mm a")}
-                        </p>
-                      </div>
-                      <p className="text-sm">{comment.content}</p>
-                    </div>
-                  </div>
-                </div>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-pulse flex flex-col w-full space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-muted rounded-lg h-24 w-full" />
               ))}
             </div>
-          )}
-
-          {/* Add Comment Form */}
-          <div className="mt-6">
-            <Textarea
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-            <Button
-              className="mt-2 w-full"
-              onClick={handleSubmitComment}
-              disabled={isSubmittingComment}
-            >
-              {isSubmittingComment ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Add Comment
-                </>
-              )}
-            </Button>
           </div>
-        </div>
-      </motion.div>
+        ) : !complaint ? (
+          <div className="flex justify-center py-12">
+            <div className="text-center">
+              <h2 className="text-xl font-medium mb-2">Complaint not found</h2>
+              <p className="text-muted-foreground mb-4">
+                The complaint you're looking for doesn't exist or has been removed.
+              </p>
+              <Button onClick={() => navigate("/admin/complaints")}>
+                View All Complaints
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Complaint details card */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="glass-card rounded-xl p-6"
+            >
+              <div className="flex flex-col md:flex-row gap-4 justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-xl font-bold">{complaint.title}</h2>
+                    <StatusBadge status={complaint.status} />
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      <span>
+                        {format(
+                          new Date(complaint.createdAt),
+                          "MMM d, yyyy 'at' h:mm a"
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FileText className="h-4 w-4" />
+                      <span>{complaint.category}</span>
+                    </div>
+                    <Badge variant={complaint.priority === "high" ? "destructive" : complaint.priority === "medium" ? "default" : "secondary"}>
+                      {complaint.priority.charAt(0).toUpperCase() + complaint.priority.slice(1)} Priority
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground mb-4">{complaint.description}</p>
+                  
+                  <div className="bg-muted p-4 rounded-lg">
+                    <h3 className="font-medium mb-2">Student Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Name:</span>{" "}
+                        <span className="font-medium">{complaint.studentName}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">ID:</span>{" "}
+                        <span className="font-medium">{complaint.studentId}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Department:</span>{" "}
+                        <span className="font-medium">{complaint.department}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 min-w-[200px]">
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="w-full">Update Status</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Update Complaint Status</DialogTitle>
+                        <DialogDescription>
+                          Change the status of this complaint. This action will be logged and the student will be notified.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4 space-y-4">
+                        <div className="space-y-2">
+                          <label htmlFor="status" className="text-sm font-medium">
+                            Status
+                          </label>
+                          <Select 
+                            value={selectedStatus} 
+                            onValueChange={(value: string) => setSelectedStatus(value as ComplaintStatus)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {COMPLAINT_STATUS_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {selectedStatus === "rejected" && (
+                          <div className="space-y-2">
+                            <label htmlFor="reason" className="text-sm font-medium">
+                              Rejection Reason
+                            </label>
+                            <Textarea
+                              id="reason"
+                              placeholder="Explain why this complaint is being rejected"
+                              value={rejectReason}
+                              onChange={(e) => setRejectReason(e.target.value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleUpdateStatus} disabled={isUpdating}>
+                          {isUpdating ? "Updating..." : "Update Status"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Comments section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold">Comments and Activity</h3>
+              
+              <div className="space-y-4">
+                {complaint.comments && complaint.comments.length > 0 ? (
+                  complaint.comments.map((comment, index) => (
+                    <motion.div
+                      key={comment.id || index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className="flex gap-4 p-4 rounded-lg border"
+                    >
+                      <Avatar>
+                        <AvatarFallback className={comment.userRole === "student" ? "bg-primary/20" : "bg-muted"}>
+                          {comment.userName?.charAt(0) || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{comment.userName}</p>
+                            <Badge variant={comment.userRole === "student" ? "outline" : "secondary"} className="text-xs">
+                              {comment.userRole === "student" ? "Student" : "Admin"}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {format(
+                              new Date(comment.createdAt),
+                              "MMM d, yyyy 'at' h:mm a"
+                            )}
+                          </p>
+                        </div>
+                        <p className="mt-2 text-sm">{comment.content}</p>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 border rounded-lg">
+                    <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground/60 mb-2" />
+                    <h4 className="text-lg font-medium">No comments yet</h4>
+                    <p className="text-muted-foreground">
+                      Be the first to add a comment to this complaint
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Add comment form */}
+              <div className="pt-4">
+                <h4 className="text-sm font-medium mb-2">Add Comment</h4>
+                <div className="flex gap-2">
+                  <Textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Type your comment here..."
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim() || isSubmittingComment}
+                    className="self-end"
+                  >
+                    {isSubmittingComment ? (
+                      "Sending..."
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Send
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </AdminLayout>
   );
 };
