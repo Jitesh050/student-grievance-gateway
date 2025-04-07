@@ -28,12 +28,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, X, Image } from "lucide-react";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const formSchema = z.object({
   title: z.string().min(5, {
@@ -43,9 +42,6 @@ const formSchema = z.object({
   }),
   category: z.string({
     required_error: "Please select a category.",
-  }),
-  priority: z.enum(["low", "medium", "high"], {
-    required_error: "Please select a priority level.",
   }),
   description: z.string().min(20, {
     message: "Description must be at least 20 characters.",
@@ -57,19 +53,54 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const NewComplaint = () => {
-  const { user } = useAuth();
+  const { user, sendNotificationEmail } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       category: "",
-      priority: "medium",
       description: "",
     },
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+
+    const newImages: { file: File; preview: string }[] = [];
+    
+    Array.from(files).forEach(file => {
+      // Validate file type and size
+      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+        toast.error(`File ${file.name} is not a supported image type`);
+        return;
+      }
+      
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`File ${file.name} is too large (max 5MB)`);
+        return;
+      }
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newImages.push({
+          file,
+          preview: reader.result as string
+        });
+        setImages(prev => [...prev, ...newImages]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
 
   const onSubmit = async (values: FormValues) => {
     if (!user) {
@@ -82,19 +113,28 @@ const NewComplaint = () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Add the new complaint with required fields (no longer optional)
+      // Add the new complaint with required fields
       const newComplaint = addComplaint({
         title: values.title,
         description: values.description,
-        category: values.category as ComplaintCategory, // Fix the type casting here
-        priority: values.priority,
+        category: values.category as ComplaintCategory,
+        priority: "medium", // Default priority, will be determined by ML
         studentId: user.studentId || "",
         studentName: user.name,
         department: user.department || "",
         status: "pending",
       });
       
-      toast.success("Complaint submitted successfully!");
+      // Send notification email to student
+      await sendNotificationEmail(
+        "Complaint Submission Confirmation", 
+        `Dear ${user.name},\n\nYour complaint "${values.title}" has been submitted successfully. Your complaint ID is ${newComplaint.id}.\n\nWe will review your complaint and get back to you as soon as possible.\n\nThank you for bringing this matter to our attention.\n\nRegards,\nStudent Grievance Redressal System`
+      );
+      
+      toast.success("Complaint submitted successfully! A confirmation email has been sent to you.");
+      
+      // In a real app, we would upload images here
+      console.log("Would upload images:", images);
       
       // Navigate to the new complaint details page
       navigate(`/complaints/${newComplaint.id}`);
@@ -144,84 +184,36 @@ const NewComplaint = () => {
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {COMPLAINT_CATEGORY_OPTIONS.map((category) => (
-                              <SelectItem key={category.value} value={category.value}>
-                                {category.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Choose the category that best fits your complaint
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="priority"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormLabel>Priority</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex space-x-4"
-                          >
-                            <FormItem className="flex items-center space-x-2 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="low" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Low
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-2 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="medium" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Medium
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-2 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="high" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                High
-                              </FormLabel>
-                            </FormItem>
-                          </RadioGroup>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormDescription>
-                          Indicate the urgency of your complaint
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <SelectContent>
+                          {COMPLAINT_CATEGORY_OPTIONS.map((category) => (
+                            <SelectItem key={category.value} value={category.value}>
+                              {category.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Choose the category that best fits your complaint
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -243,6 +235,62 @@ const NewComplaint = () => {
                     </FormItem>
                   )}
                 />
+
+                <div className="space-y-4">
+                  <div>
+                    <FormLabel htmlFor="images">Upload Images</FormLabel>
+                    <div className="mt-2">
+                      <div className="flex items-center justify-center w-full">
+                        <label 
+                          htmlFor="image-upload" 
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-500"
+                        >
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Image className="w-8 h-8 mb-3 text-gray-500 dark:text-gray-400" />
+                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                              <span className="font-semibold">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              PNG, JPG or WEBP (MAX. 5MB)
+                            </p>
+                          </div>
+                          <input 
+                            id="image-upload" 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/png, image/jpeg, image/jpg, image/webp"
+                            multiple
+                            onChange={handleFileChange}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <FormDescription>
+                      Upload images related to your complaint (optional)
+                    </FormDescription>
+                  </div>
+                  
+                  {images.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                      {images.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <img 
+                            src={image.preview} 
+                            alt={`Preview ${index}`} 
+                            className="h-24 w-full object-cover rounded-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-90 hover:opacity-100"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex justify-end">
                   <Button

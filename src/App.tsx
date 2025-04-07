@@ -18,6 +18,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Complaints = lazy(() => import("./pages/Complaints"));
 const NewComplaint = lazy(() => import("./pages/NewComplaint"));
 const ComplaintDetail = lazy(() => import("./pages/ComplaintDetail"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
 const AdminComplaintDetail = lazy(() => import("./pages/admin/AdminComplaintDetail"));
@@ -69,6 +70,11 @@ const App = () => (
               <Route path="/complaints/:id" element={
                 <ProtectedRoute>
                   <ComplaintDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <UserProfile />
                 </ProtectedRoute>
               } />
               

@@ -12,6 +12,7 @@ export interface User {
   role: UserRole;
   studentId?: string;
   department?: string;
+  profileImage?: string;
 }
 
 interface AuthContextType {
@@ -22,6 +23,7 @@ interface AuthContextType {
   signOut: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  sendNotificationEmail: (subject: string, message: string, email?: string) => Promise<boolean>;
 }
 
 // Mock user data (would be replaced with actual API calls in production)
@@ -145,6 +147,27 @@ const AuthContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Mock email notification function
+  const sendNotificationEmail = async (subject: string, message: string, email?: string): Promise<boolean> => {
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Log the email that would be sent in a real app
+      console.log(`Email sent: 
+        To: ${email || user?.email}
+        Subject: ${subject}
+        Message: ${message}
+      `);
+      
+      // In a real app, this would call an API endpoint to send the email
+      return true;
+    } catch (error) {
+      console.error('Email notification error:', error);
+      return false;
+    }
+  };
+
   // Sign out function
   const signOut = () => {
     setUser(null);
@@ -163,7 +186,8 @@ const AuthContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     isAuthenticated,
-    isAdmin
+    isAdmin,
+    sendNotificationEmail
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

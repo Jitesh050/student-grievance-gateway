@@ -179,15 +179,6 @@ const StudentSignIn = () => {
                 Admin login
               </Link>
             </div>
-            
-            {/* Demo accounts info */}
-            <div className="mt-8 text-sm border-t pt-4">
-              <p className="text-muted-foreground mb-2 text-center font-medium">Demo Student Account</p>
-              <div className="text-xs rounded bg-secondary p-2">
-                <p><span className="font-medium">Student:</span> student@college.edu</p>
-                <p><span className="font-medium">Password:</span> password</p>
-              </div>
-            </div>
           </div>
         </motion.div>
       </div>
