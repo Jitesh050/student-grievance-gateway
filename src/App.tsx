@@ -23,6 +23,8 @@ const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
 const AdminComplaintDetail = lazy(() => import("./pages/admin/AdminComplaintDetail"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -98,6 +100,16 @@ const App = () => (
               <Route path="/admin/complaints/:id" element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminComplaintDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/users" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminUsers />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/settings" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminSettings />
                 </ProtectedRoute>
               } />
               

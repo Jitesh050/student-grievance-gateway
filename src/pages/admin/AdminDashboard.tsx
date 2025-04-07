@@ -18,8 +18,21 @@ import {
   Building,
   ArrowRight,
   BarChart3,
+  PieChart,
 } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as ReChartPie, Pie, Cell, Legend } from "recharts";
+
+// Define colors for the pie chart
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+
+// Generate mock complaint categories data
+const categoryData = [
+  { name: "Infrastructure", value: 35 },
+  { name: "Academic", value: 25 },
+  { name: "Administrative", value: 20 },
+  { name: "Hostel", value: 15 },
+  { name: "Canteen", value: 5 },
+];
 
 const AdminDashboard = () => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -94,6 +107,28 @@ const AdminDashboard = () => {
     };
   });
 
+  // Custom pie chart label renderer
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="white" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight="bold"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-8">
@@ -152,67 +187,106 @@ const AdminDashboard = () => {
           />
         </div>
 
-        {/* Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          className="glass-card rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Complaint Trends</h2>
-            <BarChart3 className="h-5 w-5 text-muted-foreground" />
-          </div>
-          
-          <div className="h-[300px] mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0284c7" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#0284c7" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorResolved" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#eab308" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="total"
-                  stroke="#0284c7"
-                  fillOpacity={1}
-                  fill="url(#colorTotal)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="resolved"
-                  stroke="#22c55e"
-                  fillOpacity={1}
-                  fill="url(#colorResolved)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="pending"
-                  stroke="#eab308"
-                  fillOpacity={1}
-                  fill="url(#colorPending)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Trend Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="glass-card rounded-xl p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Complaint Trends</h2>
+              <BarChart3 className="h-5 w-5 text-muted-foreground" />
+            </div>
+            
+            <div className="h-[300px] mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0284c7" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#0284c7" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorResolved" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#eab308" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#0284c7"
+                    fillOpacity={1}
+                    fill="url(#colorTotal)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="resolved"
+                    stroke="#22c55e"
+                    fillOpacity={1}
+                    fill="url(#colorResolved)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="pending"
+                    stroke="#eab308"
+                    fillOpacity={1}
+                    fill="url(#colorPending)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
+          {/* Category Pie Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="glass-card rounded-xl p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Complaints by Category</h2>
+              <PieChart className="h-5 w-5 text-muted-foreground" />
+            </div>
+            
+            <div className="h-[300px] mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <ReChartPie>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={renderCustomizedLabel}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                  <Tooltip formatter={(value) => [`${value} complaints`, 'Count']} />
+                </ReChartPie>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+        </div>
 
         {/* Recent complaints */}
         <div>
@@ -257,110 +331,6 @@ const AdminDashboard = () => {
               )}
             </div>
           )}
-        </div>
-
-        {/* Department statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className="glass-card rounded-xl p-6"
-          >
-            <h2 className="text-xl font-bold mb-4">By Department</h2>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Building className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>Computer Science</span>
-                </div>
-                <span className="text-sm font-medium">
-                  5 ({Math.round((5 / totalComplaints) * 100)}%)
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div className="h-2 bg-primary rounded-full" style={{ width: "70%" }}></div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Building className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>Electrical Engineering</span>
-                </div>
-                <span className="text-sm font-medium">
-                  2 ({Math.round((2 / totalComplaints) * 100)}%)
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div className="h-2 bg-primary rounded-full" style={{ width: "30%" }}></div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Building className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>Mechanical Engineering</span>
-                </div>
-                <span className="text-sm font-medium">
-                  0 (0%)
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div className="h-2 bg-primary rounded-full" style={{ width: "0%" }}></div>
-              </div>
-            </div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.4 }}
-            className="glass-card rounded-xl p-6"
-          >
-            <h2 className="text-xl font-bold mb-4">By Category</h2>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="h-3 w-3 rounded-full bg-blue-500 mr-2"></div>
-                  <span>Infrastructure</span>
-                </div>
-                <span className="text-sm font-medium">
-                  3 ({Math.round((3 / totalComplaints) * 100)}%)
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
-                  <span>Administrative</span>
-                </div>
-                <span className="text-sm font-medium">
-                  2 ({Math.round((2 / totalComplaints) * 100)}%)
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="h-3 w-3 rounded-full bg-yellow-500 mr-2"></div>
-                  <span>Academic</span>
-                </div>
-                <span className="text-sm font-medium">
-                  1 ({Math.round((1 / totalComplaints) * 100)}%)
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="h-3 w-3 rounded-full bg-red-500 mr-2"></div>
-                  <span>Canteen/Food</span>
-                </div>
-                <span className="text-sm font-medium">
-                  1 ({Math.round((1 / totalComplaints) * 100)}%)
-                </span>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </div>
     </AdminLayout>

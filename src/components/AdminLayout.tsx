@@ -27,7 +27,6 @@ import {
   LogOut,
   Shield,
   ChevronRight,
-  Bell,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -63,7 +62,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       icon: FileText,
     },
     {
-      title: "Users",
+      title: "Manage Users",
       path: "/admin/users",
       icon: Users,
     },
@@ -165,21 +164,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   )?.title || "Admin Dashboard"}
                 </h1>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium text-primary-foreground flex items-center justify-center">
-                  5
-                </span>
-              </Button>
-              
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/admin">
-                  <Shield className="h-5 w-5" />
-                </Link>
-              </Button>
             </div>
           </header>
           

@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/MainLayout";
@@ -13,9 +13,9 @@ import { toast } from "sonner";
 import { User, Pencil, Camera, Save } from "lucide-react";
 
 const UserProfile = () => {
-  const { user, signOut } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(user?.profileImage || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
@@ -23,8 +23,22 @@ const UserProfile = () => {
     email: user?.email || "",
     studentId: user?.studentId || "",
     department: user?.department || "",
-    bio: ""
+    bio: user?.bio || ""
   });
+
+  // Update form data if user data changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        studentId: user.studentId || "",
+        department: user.department || "",
+        bio: user.bio || ""
+      });
+      setProfileImage(user.profileImage || null);
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -48,7 +62,16 @@ const UserProfile = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would update the user profile in the database here
+    
+    // In a real app, update the user profile in the database
+    if (updateUserProfile) {
+      updateUserProfile({
+        ...user,
+        ...formData,
+        profileImage: profileImage
+      });
+    }
+    
     toast.success("Profile updated successfully!");
     setIsEditing(false);
   };
@@ -66,7 +89,7 @@ const UserProfile = () => {
             <h1 className="text-3xl font-bold">Your Profile</h1>
             <Button 
               variant={isEditing ? "default" : "outline"} 
-              onClick={() => setIsEditing(!isEditing)}
+              onClick={() => isEditing ? handleSubmit({ preventDefault: () => {} } as React.FormEvent) : setIsEditing(true)}
             >
               {isEditing ? <Save className="h-4 w-4 mr-2" /> : <Pencil className="h-4 w-4 mr-2" />}
               {isEditing ? "Save Changes" : "Edit Profile"}
