@@ -19,6 +19,7 @@ const Complaints = lazy(() => import("./pages/Complaints"));
 const NewComplaint = lazy(() => import("./pages/NewComplaint"));
 const ComplaintDetail = lazy(() => import("./pages/ComplaintDetail"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
+const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
 const AdminComplaintDetail = lazy(() => import("./pages/admin/AdminComplaintDetail"));
@@ -75,6 +76,11 @@ const App = () => (
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <UserProfile />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <UserSettings />
                 </ProtectedRoute>
               } />
               
