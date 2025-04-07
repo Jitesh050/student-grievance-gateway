@@ -19,12 +19,10 @@ const Complaints = lazy(() => import("./pages/Complaints"));
 const NewComplaint = lazy(() => import("./pages/NewComplaint"));
 const ComplaintDetail = lazy(() => import("./pages/ComplaintDetail"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
-const UserSettings = lazy(() => import("./pages/UserSettings"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
 const AdminComplaintDetail = lazy(() => import("./pages/admin/AdminComplaintDetail"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
-const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -80,11 +78,6 @@ const App = () => (
                   <UserProfile />
                 </ProtectedRoute>
               } />
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <UserSettings />
-                </ProtectedRoute>
-              } />
               
               {/* Protected admin routes */}
               <Route path="/admin" element={
@@ -105,11 +98,6 @@ const App = () => (
               <Route path="/admin/users" element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminUsers />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/settings" element={
-                <ProtectedRoute requiredRole="admin">
-                  <AdminSettings />
                 </ProtectedRoute>
               } />
               

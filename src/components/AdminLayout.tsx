@@ -23,7 +23,6 @@ import {
   Home,
   FileText,
   Users,
-  Settings,
   LogOut,
   Shield,
   ChevronRight,
@@ -65,11 +64,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       title: "Manage Users",
       path: "/admin/users",
       icon: Users,
-    },
-    {
-      title: "Settings",
-      path: "/admin/settings",
-      icon: Settings,
     },
   ];
 
