@@ -63,16 +63,17 @@ const UserProfile = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, update the user profile in the database
-    if (updateUserProfile) {
+    if (user && updateUserProfile) {
       updateUserProfile({
         ...user,
-        ...formData,
-        profileImage: profileImage
+        name: formData.name,
+        studentId: formData.studentId || user.studentId,
+        department: formData.department || user.department,
+        bio: formData.bio,
+        profileImage: profileImage || user.profileImage
       });
     }
     
-    toast.success("Profile updated successfully!");
     setIsEditing(false);
   };
 

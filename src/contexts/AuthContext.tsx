@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -13,6 +12,7 @@ export interface User {
   studentId?: string;
   department?: string;
   profileImage?: string;
+  bio?: string; // Add bio property to the User interface
 }
 
 interface AuthContextType {
@@ -23,6 +23,7 @@ interface AuthContextType {
   signOut: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  updateUserProfile: (updatedUser: User) => void; // Add this method
   sendNotificationEmail: (subject: string, message: string, email?: string) => Promise<boolean>;
 }
 
@@ -34,13 +35,15 @@ const MOCK_USERS: User[] = [
     name: 'John Student',
     role: 'student',
     studentId: 'STU1234',
-    department: 'Computer Science'
+    department: 'Computer Science',
+    bio: '' // Initialize with empty bio
   },
   {
     id: '2',
     email: 'admin@college.edu',
     name: 'Admin User',
     role: 'admin',
+    bio: '' // Initialize with empty bio
   }
 ];
 
@@ -126,7 +129,8 @@ const AuthContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name,
         role: 'student',
         studentId,
-        department
+        department,
+        bio: '' // Initialize with empty bio
       };
       
       // Add to mock users (in a real app, this would be persisted to a database)
@@ -168,6 +172,23 @@ const AuthContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // New function to update user profile
+  const updateUserProfile = (updatedUser: User) => {
+    // Update user in the state
+    setUser(updatedUser);
+    
+    // Update user in local storage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Update user in the mock database (in a real app, this would be an API call)
+    const userIndex = MOCK_USERS.findIndex(u => u.id === updatedUser.id);
+    if (userIndex !== -1) {
+      MOCK_USERS[userIndex] = updatedUser;
+    }
+    
+    toast.success("Profile updated successfully!");
+  };
+
   // Sign out function
   const signOut = () => {
     setUser(null);
@@ -185,6 +206,7 @@ const AuthContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
+    updateUserProfile,
     isAuthenticated,
     isAdmin,
     sendNotificationEmail
