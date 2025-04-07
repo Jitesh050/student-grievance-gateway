@@ -24,6 +24,10 @@ const ProfileMenu = () => {
   const goToProfile = () => {
     navigate("/profile");
   };
+
+  const goToSettings = () => {
+    navigate("/settings");
+  };
   
   // Get first letter of each word in name
   const getInitials = (name: string) => {
@@ -41,6 +45,7 @@ const ProfileMenu = () => {
       <DropdownMenuTrigger asChild>
         <button className="rounded-full outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
           <Avatar>
+            <AvatarImage src={user.profileImage} alt={user.name} />
             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
           </Avatar>
         </button>
@@ -56,6 +61,10 @@ const ProfileMenu = () => {
         <DropdownMenuItem onClick={goToProfile}>
           <User className="mr-2 h-4 w-4" />
           <span>My Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={goToSettings}>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Account Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
