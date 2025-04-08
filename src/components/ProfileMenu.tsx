@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 
 const ProfileMenu = () => {
   const { user, signOut } = useAuth();
@@ -23,10 +23,6 @@ const ProfileMenu = () => {
   
   const goToProfile = () => {
     navigate("/profile");
-  };
-
-  const goToSettings = () => {
-    navigate("/settings");
   };
   
   // Get first letter of each word in name
@@ -61,10 +57,6 @@ const ProfileMenu = () => {
         <DropdownMenuItem onClick={goToProfile}>
           <User className="mr-2 h-4 w-4" />
           <span>My Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={goToSettings}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Account Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>

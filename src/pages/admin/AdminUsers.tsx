@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Ban, CheckCircle, Search, User, AlertTriangle, Shield } from "lucide-react";
+import { Ban, CheckCircle, Search, User as UserIcon, AlertTriangle, Shield } from "lucide-react";
 
 // Mock user data - in a real app, this would come from an API
 const MOCK_USERS = [
@@ -165,7 +165,7 @@ const AdminUsers = () => {
           <Tabs defaultValue="users" className="space-y-6">
             <TabsList className="grid grid-cols-2 max-w-md">
               <TabsTrigger value="users">
-                <Users className="h-4 w-4 mr-2" />
+                <UserIcon className="h-4 w-4 mr-2" />
                 All Users
               </TabsTrigger>
               <TabsTrigger value="settings">
