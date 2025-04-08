@@ -1,4 +1,3 @@
-
 export type ComplaintStatus = 
   | 'pending' 
   | 'in-progress' 
@@ -26,6 +25,13 @@ export interface Comment {
   createdAt: Date;
 }
 
+export interface ComplaintUpdate {
+  date: string;
+  description: string;
+  status: ComplaintStatus;
+  by: string;
+}
+
 export interface Complaint {
   id: string;
   title: string;
@@ -42,6 +48,7 @@ export interface Complaint {
   assignedTo?: string;
   resolvedAt?: Date;
   rejectionReason?: string;
+  updates?: ComplaintUpdate[];
 }
 
 export interface ComplaintStatusOption {

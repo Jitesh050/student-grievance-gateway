@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import AdminLayout from "@/components/AdminLayout";
@@ -14,7 +13,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Ban, CheckCircle, Search, User as UserIcon, AlertTriangle, Shield } from "lucide-react";
 
-// Mock user data - in a real app, this would come from an API
 const MOCK_USERS = [
   {
     id: "1",
@@ -73,7 +71,6 @@ const MOCK_USERS = [
   }
 ];
 
-// List of flagged words that should trigger warnings
 const FLAGGED_WORDS = [
   "violence", "threat", "kill", "attack", "hate", 
   "harassment", "abuse", "racist", "sexist", "offensive",
@@ -91,11 +88,9 @@ const AdminUsers = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate API loading
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
         setUsers(MOCK_USERS);
         setFilteredUsers(MOCK_USERS);
@@ -346,7 +341,7 @@ const AdminUsers = () => {
                             <TableRow>
                               <TableCell colSpan={6} className="h-24 text-center">
                                 <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                  <User className="h-8 w-8 mb-2" />
+                                  <UserIcon className="h-8 w-8 mb-2" />
                                   <p>No users found</p>
                                   <p className="text-sm">Try adjusting your search</p>
                                 </div>

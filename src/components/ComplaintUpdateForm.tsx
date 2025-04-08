@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Complaint } from "@/lib/types";
+import { Complaint, ComplaintStatus, ComplaintUpdate } from "@/lib/types";
 
 interface ComplaintUpdateFormProps {
   complaint: Complaint;
@@ -23,8 +23,8 @@ const ComplaintUpdateForm = ({
   onUpdate, 
   onCancel 
 }: ComplaintUpdateFormProps) => {
-  const [status, setStatus] = useState<"pending" | "in-progress" | "resolved" | "rejected">(
-    complaint.status as "pending" | "in-progress" | "resolved" | "rejected"
+  const [status, setStatus] = useState<ComplaintStatus>(
+    complaint.status
   );
   const [updateDescription, setUpdateDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,7 +40,7 @@ const ComplaintUpdateForm = ({
     setIsSubmitting(true);
     
     // Create an update with timestamp and description
-    const update = {
+    const update: ComplaintUpdate = {
       date: new Date().toISOString(),
       description: updateDescription,
       status: status,
@@ -64,7 +64,7 @@ const ComplaintUpdateForm = ({
         <label className="block text-sm font-medium mb-1">Update Status</label>
         <Select
           value={status}
-          onValueChange={(value: "pending" | "in-progress" | "resolved" | "rejected") => setStatus(value)}
+          onValueChange={(value: ComplaintStatus) => setStatus(value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
