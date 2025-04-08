@@ -23,7 +23,9 @@ const ComplaintUpdateForm = ({
   onUpdate, 
   onCancel 
 }: ComplaintUpdateFormProps) => {
-  const [status, setStatus] = useState(complaint.status);
+  const [status, setStatus] = useState<"pending" | "in-progress" | "resolved" | "rejected">(
+    complaint.status as "pending" | "in-progress" | "resolved" | "rejected"
+  );
   const [updateDescription, setUpdateDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -62,7 +64,7 @@ const ComplaintUpdateForm = ({
         <label className="block text-sm font-medium mb-1">Update Status</label>
         <Select
           value={status}
-          onValueChange={setStatus}
+          onValueChange={(value: "pending" | "in-progress" | "resolved" | "rejected") => setStatus(value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />

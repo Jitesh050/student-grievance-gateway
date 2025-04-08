@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -32,21 +31,18 @@ const AdminDashboard = () => {
   }, []);
 
   // Analyze complaints by category
-  const categoryData = React.useMemo(() => {
-    if (!complaints.length) return [];
-    
-    const categories: Record<string, number> = {};
-    
-    complaints.forEach(complaint => {
-      const category = complaint.category;
-      if (!categories[category]) {
-        categories[category] = 0;
-      }
-      categories[category]++;
-    });
-    
-    return Object.entries(categories).map(([name, value]) => ({ name, value }));
-  }, [complaints]);
+  const categoryData = complaints.length > 0 
+    ? Object.entries(
+        complaints.reduce((acc, complaint) => {
+          const category = complaint.category;
+          if (!acc[category]) {
+            acc[category] = 0;
+          }
+          acc[category]++;
+          return acc;
+        }, {} as Record<string, number>)
+      ).map(([name, value]) => ({ name, value }))
+    : [];
 
   // Colors for the pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
