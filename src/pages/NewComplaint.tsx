@@ -113,7 +113,16 @@ const NewComplaint = () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Add the new complaint with required fields
+      // Process the image (in a real app, would upload to server)
+      let imageUrl = "";
+      if (images.length > 0) {
+        // In a real app, this would be an actual upload
+        // For now, we'll just use the preview data URL
+        imageUrl = images[0].preview;
+        console.log("Using image URL:", imageUrl);
+      }
+      
+      // Add the new complaint with required fields including image
       const newComplaint = addComplaint({
         title: values.title,
         description: values.description,
@@ -123,18 +132,16 @@ const NewComplaint = () => {
         studentName: user.name,
         department: user.department || "",
         status: "pending",
+        imageUrl: imageUrl, // Add the image URL to the complaint
       });
       
       // Send notification email to student
       await sendNotificationEmail(
         "Complaint Submission Confirmation", 
-        `Dear ${user.name},\n\nYour complaint "${values.title}" has been submitted successfully. Your complaint ID is ${newComplaint.id}.\n\nWe will review your complaint and get back to you as soon as possible.\n\nThank you for bringing this matter to our attention.\n\nRegards,\nStudent Grievance Redressal System`
+        `Dear ${user.name},\n\nYour complaint "${values.title}" has been submitted successfully. Your complaint ID is ${newComplaint.id}.\n\nWe will review your complaint and get back to you as soon as possible.\n\nThank you for bringing this matter to our attention.\n\nRegards,\nComplainHub - Student Grievance Redressal System`
       );
       
       toast.success("Complaint submitted successfully! A confirmation email has been sent to you.");
-      
-      // In a real app, we would upload images here
-      console.log("Would upload images:", images);
       
       // Navigate to the new complaint details page
       navigate(`/complaints/${newComplaint.id}`);

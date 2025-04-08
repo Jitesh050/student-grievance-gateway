@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -6,6 +5,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import MainLayout from "@/components/MainLayout";
 import StatusBadge from "@/components/StatusBadge";
+import ComplaintImageDisplay from "@/components/ComplaintImageDisplay";
 import { getComplaintById, addCommentToComplaint } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Complaint, Comment } from "@/lib/types";
@@ -36,18 +36,15 @@ const ComplaintDetail = () => {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   useEffect(() => {
-    // Fetch complaint details
     const fetchComplaintDetails = async () => {
       setIsLoading(true);
       try {
-        // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 800));
         
         if (id) {
           const complaintData = getComplaintById(id);
           
           if (complaintData) {
-            // Ensure the complaint belongs to the current user
             if (user && complaintData.studentId === user.studentId) {
               setComplaint(complaintData);
             } else {
@@ -81,10 +78,8 @@ const ComplaintDetail = () => {
         content: newComment,
       };
       
-      // Add the comment
       const addedComment = addCommentToComplaint(complaint.id, commentData);
       
-      // Update local state
       setComplaint({
         ...complaint,
         comments: [...complaint.comments, addedComment],
@@ -133,7 +128,6 @@ const ComplaintDetail = () => {
     );
   }
 
-  // Sort comments by most recent first
   const sortedComments = [...complaint.comments].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -141,7 +135,6 @@ const ComplaintDetail = () => {
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto">
-        {/* Back button */}
         <Button
           variant="ghost"
           className="mb-6"
@@ -151,7 +144,6 @@ const ComplaintDetail = () => {
           Back to Complaints
         </Button>
 
-        {/* Complaint details */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -226,6 +218,16 @@ const ComplaintDetail = () => {
               </p>
             </div>
 
+            {complaint.imageUrl && (
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-3">Uploaded Image</h3>
+                <ComplaintImageDisplay 
+                  imageUrl={complaint.imageUrl}
+                  altText={`Image for complaint: ${complaint.title}`}
+                />
+              </div>
+            )}
+
             {complaint.status === "resolved" && complaint.resolvedAt && (
               <div className="mt-6 bg-green-500/10 p-4 rounded-lg">
                 <h3 className="text-lg font-medium text-green-700 dark:text-green-400 mb-2">
@@ -260,11 +262,9 @@ const ComplaintDetail = () => {
             )}
           </div>
 
-          {/* Comments section */}
           <section className="mb-6">
             <h2 className="text-xl font-bold mb-4">Comments</h2>
 
-            {/* Add comment */}
             <div className="glass-card rounded-xl p-6 mb-6">
               <h3 className="text-lg font-medium mb-4">Add a Comment</h3>
               <div className="flex items-start gap-4">
@@ -306,7 +306,6 @@ const ComplaintDetail = () => {
               </div>
             </div>
 
-            {/* Comments list */}
             {sortedComments.length > 0 ? (
               <div className="space-y-4">
                 {sortedComments.map((comment, index) => (
