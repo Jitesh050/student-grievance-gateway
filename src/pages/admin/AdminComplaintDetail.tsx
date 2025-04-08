@@ -6,6 +6,7 @@ import { getComplaintById, updateComplaintStatus, addCommentToComplaint } from "
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import ComplaintImageDisplay from "@/components/ComplaintImageDisplay";
 import {
   ArrowLeft,
   MessageSquare,
@@ -194,7 +195,7 @@ const AdminComplaintDetail = () => {
               className="glass-card rounded-xl p-6"
             >
               <div className="flex flex-col md:flex-row gap-4 justify-between">
-                <div>
+                <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-xl font-bold">{complaint.title}</h2>
                     <StatusBadge status={complaint.status} />
@@ -218,6 +219,17 @@ const AdminComplaintDetail = () => {
                     </Badge>
                   </div>
                   <p className="text-muted-foreground mb-4">{complaint.description}</p>
+                  
+                  {/* Student Uploaded Image */}
+                  {complaint.imageUrl && (
+                    <div className="mb-4">
+                      <h3 className="font-medium mb-2">Attached Image</h3>
+                      <ComplaintImageDisplay 
+                        imageUrl={complaint.imageUrl}
+                        altText={`Image for complaint: ${complaint.title}`}
+                      />
+                    </div>
+                  )}
                   
                   <div className="bg-muted p-4 rounded-lg">
                     <h3 className="font-medium mb-2">Student Details</h3>
