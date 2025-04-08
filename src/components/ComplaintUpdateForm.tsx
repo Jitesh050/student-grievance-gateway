@@ -103,6 +103,7 @@ const ComplaintUpdateForm = ({
         <Button 
           type="submit"
           disabled={isSubmitting || !updateDescription.trim()}
+          className="bg-indigo-600 hover:bg-indigo-700"
         >
           {isSubmitting ? "Updating..." : "Update Complaint"}
         </Button>

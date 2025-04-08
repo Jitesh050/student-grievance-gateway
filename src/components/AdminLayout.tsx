@@ -70,11 +70,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   // Set page title based on current route
   useEffect(() => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
-    let title = "Admin - College Complaint System";
+    let title = "Admin - ComplainHub";
     
     if (pathSegments.length > 1) {
       const lastSegment = pathSegments[pathSegments.length - 1];
-      title = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1) + " - Admin";
+      title = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1) + " - Admin Portal";
     }
     
     document.title = title;
@@ -85,9 +85,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <div className="flex min-h-screen w-full bg-background">
         <Sidebar className="border-r border-border">
           <SidebarHeader className="px-6 py-5">
-            <div className="flex items-center gap-2 text-primary font-medium text-lg">
+            <div className="flex items-center gap-2 text-indigo-600 font-medium text-lg">
               <Shield className="w-5 h-5" />
-              <span>Admin Panel</span>
+              <span>ComplainHub Admin</span>
             </div>
           </SidebarHeader>
           
@@ -101,7 +101,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                       <SidebarMenuButton
                         className={`w-full ${
                           location.pathname === item.path
-                            ? "bg-primary/10 text-primary"
+                            ? "bg-indigo-600/10 text-indigo-600"
                             : ""
                         }`}
                         onClick={() => handleNavigation(item.path)}
@@ -131,7 +131,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 
                 <div className="ml-3">
                   <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground text-primary">Admin</p>
+                  <p className="text-xs text-indigo-600">Administrator</p>
                 </div>
               </div>
               

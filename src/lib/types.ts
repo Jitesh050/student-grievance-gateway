@@ -1,3 +1,4 @@
+
 export type ComplaintStatus = 
   | 'pending' 
   | 'in-progress' 
@@ -49,6 +50,7 @@ export interface Complaint {
   resolvedAt?: Date;
   rejectionReason?: string;
   updates?: ComplaintUpdate[];
+  imageUrl?: string; // Add support for image attachment
 }
 
 export interface ComplaintStatusOption {
@@ -76,7 +78,7 @@ export const COMPLAINT_STATUS_OPTIONS: ComplaintStatusOption[] = [
   { 
     value: 'rejected', 
     label: 'Rejected', 
-    color: 'bg-red-500' 
+    color: 'bg-purple-500' // Changed from red to purple
   },
 ];
 

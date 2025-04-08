@@ -13,7 +13,7 @@ const Index = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Shield className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">CMS</span>
+              <span className="font-bold text-xl">ComplainHub</span>
             </div>
             <div className="flex items-center gap-4">
               <Link to="/signin" className="text-sm font-medium hover:text-primary transition-colors">Student Login</Link>
@@ -63,7 +63,7 @@ const Index = () => {
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800">
                 <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent z-10"></div>
                 <img
-                  src="/placeholder.svg"
+                  src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
                   alt="Student using complaint platform"
                   className="w-full h-full object-cover aspect-[4/3]"
                 />
@@ -79,10 +79,10 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
               <Shield className="h-5 w-5 text-primary" />
-              <span className="font-bold">College Complaint Management System</span>
+              <span className="font-bold">ComplainHub - College Complaint Management System</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2023 CMS. All rights reserved.
+              © 2025 ComplainHub. All rights reserved.
             </p>
           </div>
         </div>

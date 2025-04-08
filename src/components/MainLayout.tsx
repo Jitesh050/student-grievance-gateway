@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -67,11 +68,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
-    let title = "College Complaint System";
+    let title = "ComplainHub - College Complaint System";
     
     if (pathSegments.length > 0) {
       const lastSegment = pathSegments[pathSegments.length - 1];
-      title = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1) + " - College Complaint System";
+      title = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1) + " - ComplainHub";
     }
     
     document.title = title;
@@ -84,7 +85,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <SidebarHeader className="px-6 py-5">
             <div className="flex items-center gap-2 text-primary font-medium text-lg">
               <FileText className="w-5 h-5" />
-              <span>CMS</span>
+              <span>ComplainHub</span>
             </div>
           </SidebarHeader>
           
@@ -152,7 +153,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <h1 className="text-xl font-medium">
                   {navigationItems.find(
                     (item) => item.path === location.pathname
-                  )?.title || "College Complaint System"}
+                  )?.title || "ComplainHub"}
                 </h1>
               </div>
             </div>
