@@ -5,83 +5,83 @@
 
 @layer base {
   :root {
-    --background: 220 25% 98%;
-    --foreground: 220 15% 15%;
+    --background: 255 255 255;
+    --foreground: 0 0 0;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --card: 255 255 255;
+    --card-foreground: 0 0 0;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
 
-    --primary: 270 95% 65%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 251 191 36;
+    --primary-foreground: 0 0 0;
 
-    --secondary: 220 15% 96%;
-    --secondary-foreground: 220 20% 25%;
+    --secondary: 229 231 235;
+    --secondary-foreground: 0 0 0;
 
-    --muted: 220 15% 95%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 229 231 235;
+    --muted-foreground: 107 114 128;
 
-    --accent: 270 90% 92%;
-    --accent-foreground: 270 30% 20%;
+    --accent: 251 191 36;
+    --accent-foreground: 0 0 0;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 92%;
-    --ring: 270 95% 65%;
+    --border: 0 0 0;
+    --input: 229 231 235;
+    --ring: 251 191 36;
 
-    --radius: 12px;
+    --radius: 0px;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 15% 15%;
-    --sidebar-primary: 270 95% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 96%;
-    --sidebar-accent-foreground: 220 20% 25%;
-    --sidebar-border: 220 15% 88%;
-    --sidebar-ring: 270 95% 65%;
+    --sidebar-background: 255 255 255;
+    --sidebar-foreground: 0 0 0;
+    --sidebar-primary: 251 191 36;
+    --sidebar-primary-foreground: 0 0 0;
+    --sidebar-accent: 229 231 235;
+    --sidebar-accent-foreground: 0 0 0;
+    --sidebar-border: 0 0 0;
+    --sidebar-ring: 251 191 36;
   }
 
   .dark {
-    --background: 220 30% 8%;
-    --foreground: 220 15% 92%;
+    --background: 17 24 39;
+    --foreground: 255 255 255;
 
-    --card: 220 25% 12%;
-    --card-foreground: 220 15% 92%;
+    --card: 31 41 55;
+    --card-foreground: 255 255 255;
 
-    --popover: 220 25% 12%;
-    --popover-foreground: 220 15% 92%;
+    --popover: 31 41 55;
+    --popover-foreground: 255 255 255;
 
-    --primary: 270 95% 70%;
-    --primary-foreground: 220 30% 8%;
+    --primary: 251 191 36;
+    --primary-foreground: 0 0 0;
 
-    --secondary: 220 25% 16%;
-    --secondary-foreground: 220 15% 85%;
+    --secondary: 55 65 81;
+    --secondary-foreground: 255 255 255;
 
-    --muted: 220 25% 14%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 55 65 81;
+    --muted-foreground: 156 163 175;
 
-    --accent: 270 50% 20%;
-    --accent-foreground: 270 15% 85%;
+    --accent: 251 191 36;
+    --accent-foreground: 0 0 0;
 
-    --destructive: 0 65% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
 
-    --border: 220 25% 18%;
-    --input: 220 25% 16%;
-    --ring: 270 95% 70%;
+    --border: 255 255 255;
+    --input: 55 65 81;
+    --ring: 251 191 36;
     
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 220 15% 92%;
-    --sidebar-primary: 270 95% 70%;
-    --sidebar-primary-foreground: 220 30% 8%;
-    --sidebar-accent: 220 25% 16%;
-    --sidebar-accent-foreground: 220 15% 85%;
-    --sidebar-border: 220 25% 18%;
-    --sidebar-ring: 270 95% 70%;
+    --sidebar-background: 17 24 39;
+    --sidebar-foreground: 255 255 255;
+    --sidebar-primary: 251 191 36;
+    --sidebar-primary-foreground: 0 0 0;
+    --sidebar-accent: 55 65 81;
+    --sidebar-accent-foreground: 255 255 255;
+    --sidebar-border: 255 255 255;
+    --sidebar-ring: 251 191 36;
   }
 }
 
@@ -95,91 +95,107 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-weight: 500;
   }
   
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
   }
   
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgb(229 231 235);
+    border: 2px solid rgb(0 0 0);
   }
   
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.3);
-    border-radius: 6px;
+    background: rgb(251 191 36);
+    border: 2px solid rgb(0 0 0);
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5);
+    background: rgb(245 158 11);
   }
   
-  /* Smooth transitions for all elements */
+  /* Bold transitions for neobrutalist style */
   * {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
+  }
+  
+  /* Typography overrides for bold look */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 900;
+    letter-spacing: -0.025em;
+  }
+  
+  button {
+    font-weight: 700;
   }
 }
 
 @layer components {
-  .glass-card {
-    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 shadow-xl shadow-black/5 dark:shadow-black/20;
-  }
-  
-  .glass-surface {
-    @apply bg-white/60 dark:bg-gray-800/60 backdrop-blur-md border border-white/20 dark:border-gray-600/20 shadow-lg shadow-black/5;
-  }
-  
-  .glass-button {
-    @apply bg-white/20 dark:bg-gray-700/20 backdrop-blur-sm border border-white/30 dark:border-gray-600/30 hover:bg-white/30 dark:hover:bg-gray-600/30;
-  }
-  
   .neo-card {
-    @apply bg-white dark:bg-gray-900 border-2 border-gray-900 dark:border-white shadow-[4px_4px_0px_0px_rgb(15,23,42)] dark:shadow-[4px_4px_0px_0px_rgb(255,255,255)];
+    @apply bg-white dark:bg-gray-800 border-4 border-black shadow-[6px_6px_0px_0px_rgb(0,0,0)] dark:shadow-[6px_6px_0px_0px_rgb(255,255,255)];
+  }
+  
+  .neo-button {
+    @apply bg-yellow-400 hover:bg-yellow-300 text-black border-4 border-black font-bold shadow-[4px_4px_0px_0px_rgb(0,0,0)] hover:shadow-[2px_2px_0px_0px_rgb(0,0,0)] transition-all;
+  }
+  
+  .neo-input {
+    @apply bg-white border-4 border-black font-bold text-black placeholder:text-black/50 focus:shadow-[4px_4px_0px_0px_rgb(0,0,0)];
   }
   
   .floating-action {
-    @apply fixed bottom-6 right-6 z-50 bg-gradient-to-r from-primary to-primary/80 text-white rounded-full shadow-2xl hover:shadow-primary/25 hover:scale-105 active:scale-95;
+    @apply fixed bottom-8 right-8 z-50;
   }
   
   .status-badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm;
+    @apply inline-flex items-center px-4 py-2 border-2 border-black text-sm font-bold;
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-yellow-400 via-red-400 to-pink-400 bg-clip-text text-transparent;
   }
   
-  .glow-effect {
-    @apply relative before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-primary/20 before:to-purple-500/20 before:blur-xl before:-z-10;
+  .glass-card {
+    @apply neo-card;
+  }
+  
+  .glass-surface {
+    @apply neo-card;
+  }
+  
+  .glass-button {
+    @apply neo-button;
   }
 }
 
-/* Typography Scale */
+/* Typography Scale - Bold & Modern */
 @layer utilities {
   .text-display {
-    @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
+    @apply text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter;
   }
   
   .text-headline {
-    @apply text-2xl md:text-3xl font-bold tracking-tight;
+    @apply text-3xl md:text-4xl font-black tracking-tight;
   }
   
   .text-title {
-    @apply text-xl font-semibold tracking-tight;
+    @apply text-xl font-bold tracking-tight;
   }
   
   .text-body {
-    @apply text-base leading-relaxed;
+    @apply text-base leading-relaxed font-medium;
   }
   
   .text-caption {
-    @apply text-sm text-muted-foreground;
+    @apply text-sm font-bold;
   }
 }
 
 /* Import Inter font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');

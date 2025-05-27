@@ -27,6 +27,7 @@ import {
   LogOut,
   ChevronRight,
   Shield,
+  Zap,
 } from "lucide-react";
 
 interface MainLayoutProps {
@@ -54,16 +55,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       title: "Dashboard",
       path: "/dashboard",
       icon: Home,
+      color: "bg-blue-400",
     },
     {
       title: "My Complaints",
       path: "/complaints",
       icon: FileText,
+      color: "bg-green-400",
     },
     {
       title: "New Complaint",
       path: "/complaints/new",
       icon: PlusCircle,
+      color: "bg-yellow-400",
     },
   ];
 
@@ -81,36 +85,38 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar className="glass-surface border-r backdrop-blur-xl">
-          <SidebarHeader className="px-6 py-6">
+      <div className="flex min-h-screen w-full bg-white dark:bg-gray-900">
+        <Sidebar className="bg-white dark:bg-gray-900 border-r-4 border-black">
+          <SidebarHeader className="px-6 py-6 border-b-4 border-black">
             <div className="flex items-center gap-3">
-              <div className="glow-effect">
-                <Shield className="w-6 h-6 text-primary" />
+              <div className="bg-red-400 p-2 border-4 border-black">
+                <Shield className="w-6 h-6 text-black" />
               </div>
-              <span className="gradient-text font-bold text-lg">ComplainHub</span>
+              <span className="text-black dark:text-white font-black text-xl tracking-tight">ComplainHub</span>
             </div>
           </SidebarHeader>
           
-          <SidebarContent>
+          <SidebarContent className="p-4">
             <SidebarGroup>
-              <SidebarGroupLabel className="text-muted-foreground">Navigation</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-black dark:text-white font-bold text-sm uppercase tracking-wider mb-4">
+                Navigation
+              </SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu className="space-y-2">
+                <SidebarMenu className="space-y-3">
                   {navigationItems.map((item) => (
                     <SidebarMenuItem key={item.path}>
                       <SidebarMenuButton
-                        className={`w-full rounded-xl transition-all duration-300 ${
+                        className={`w-full border-4 border-black font-bold text-black transition-all duration-200 hover:shadow-[4px_4px_0px_0px_rgb(0,0,0)] ${
                           location.pathname === item.path
-                            ? "bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary border border-primary/20"
-                            : "hover:bg-white/50 dark:hover:bg-gray-800/50"
+                            ? `${item.color} shadow-[4px_4px_0px_0px_rgb(0,0,0)]`
+                            : "bg-gray-200 hover:bg-gray-300"
                         }`}
                         onClick={() => handleNavigation(item.path)}
                       >
                         <item.icon className="w-5 h-5" />
-                        <span className="font-medium">{item.title}</span>
+                        <span>{item.title}</span>
                         {location.pathname === item.path && (
-                          <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+                          <Zap className="h-4 w-4 ml-auto" />
                         )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -120,25 +126,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </SidebarGroup>
           </SidebarContent>
           
-          <SidebarFooter className="border-t border-white/20 dark:border-gray-700/30">
+          <SidebarFooter className="border-t-4 border-black">
             <div className="p-4">
-              <div className="flex items-center mb-4 p-3 glass-surface rounded-xl border">
-                <Avatar className="ring-2 ring-primary/20">
-                  <AvatarFallback className="bg-gradient-to-r from-primary to-purple-500 text-white">
+              <div className="flex items-center mb-4 p-4 bg-purple-400 border-4 border-black">
+                <Avatar className="border-4 border-black">
+                  <AvatarFallback className="bg-black text-white font-bold">
                     {user?.name?.charAt(0) || "U"}
                   </AvatarFallback>
                   <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name}`} />
                 </Avatar>
                 
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-sm font-bold text-black">{user?.name}</p>
+                  <p className="text-xs text-black/70 font-medium">{user?.email}</p>
                 </div>
               </div>
               
               <Button
                 variant="outline"
-                className="w-full justify-start glass-button rounded-xl"
+                className="w-full justify-start bg-red-400 text-black border-4 border-black font-bold hover:bg-red-300 shadow-[2px_2px_0px_0px_rgb(0,0,0)] hover:shadow-[4px_4px_0px_0px_rgb(0,0,0)]"
                 onClick={signOut}
               >
                 <LogOut className="w-4 h-4 mr-2" />
@@ -149,11 +155,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </Sidebar>
 
         <div className="flex flex-col flex-1 w-full">
-          <header className="flex items-center justify-between px-6 py-4 glass-surface border-b backdrop-blur-xl h-16">
+          <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-900 border-b-4 border-black h-20">
             <div className="flex items-center">
-              <SidebarTrigger className="glass-button rounded-lg" />
-              <div className="ml-4">
-                <h1 className="text-xl font-semibold">
+              <SidebarTrigger className="bg-orange-400 text-black border-4 border-black font-bold hover:bg-orange-300 shadow-[2px_2px_0px_0px_rgb(0,0,0)] hover:shadow-[4px_4px_0px_0px_rgb(0,0,0)]" />
+              <div className="ml-6">
+                <h1 className="text-2xl font-black text-black dark:text-white">
                   {navigationItems.find(
                     (item) => item.path === location.pathname
                   )?.title || "ComplainHub"}
@@ -166,7 +172,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </div>
           </header>
           
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-6 overflow-auto bg-gray-50 dark:bg-gray-800">
             <motion.div
               initial={{ opacity: pageTransition ? 0 : 1 }}
               animate={{ opacity: 1 }}
