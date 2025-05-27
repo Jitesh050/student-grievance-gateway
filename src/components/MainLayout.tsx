@@ -19,13 +19,14 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import ProfileMenu from "@/components/ProfileMenu";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   Home,
   FileText,
   PlusCircle,
   LogOut,
   ChevronRight,
+  Shield,
 } from "lucide-react";
 
 interface MainLayoutProps {
@@ -81,33 +82,35 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
-        <Sidebar className="border-r border-border">
-          <SidebarHeader className="px-6 py-5">
-            <div className="flex items-center gap-2 text-primary font-medium text-lg">
-              <FileText className="w-5 h-5" />
-              <span>ComplainHub</span>
+        <Sidebar className="glass-surface border-r backdrop-blur-xl">
+          <SidebarHeader className="px-6 py-6">
+            <div className="flex items-center gap-3">
+              <div className="glow-effect">
+                <Shield className="w-6 h-6 text-primary" />
+              </div>
+              <span className="gradient-text font-bold text-lg">ComplainHub</span>
             </div>
           </SidebarHeader>
           
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+              <SidebarGroupLabel className="text-muted-foreground">Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="space-y-2">
                   {navigationItems.map((item) => (
                     <SidebarMenuItem key={item.path}>
                       <SidebarMenuButton
-                        className={`w-full ${
+                        className={`w-full rounded-xl transition-all duration-300 ${
                           location.pathname === item.path
-                            ? "bg-primary/10 text-primary"
-                            : ""
+                            ? "bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary border border-primary/20"
+                            : "hover:bg-white/50 dark:hover:bg-gray-800/50"
                         }`}
                         onClick={() => handleNavigation(item.path)}
                       >
                         <item.icon className="w-5 h-5" />
-                        <span>{item.title}</span>
+                        <span className="font-medium">{item.title}</span>
                         {location.pathname === item.path && (
-                          <ChevronRight className="h-4 w-4 ml-auto" />
+                          <ChevronRight className="h-4 w-4 ml-auto text-primary" />
                         )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -117,17 +120,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </SidebarGroup>
           </SidebarContent>
           
-          <SidebarFooter className="border-t">
+          <SidebarFooter className="border-t border-white/20 dark:border-gray-700/30">
             <div className="p-4">
-              <div className="flex items-center mb-4">
-                <Avatar>
-                  <AvatarFallback>
+              <div className="flex items-center mb-4 p-3 glass-surface rounded-xl border">
+                <Avatar className="ring-2 ring-primary/20">
+                  <AvatarFallback className="bg-gradient-to-r from-primary to-purple-500 text-white">
                     {user?.name?.charAt(0) || "U"}
                   </AvatarFallback>
                   <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name}`} />
                 </Avatar>
                 
-                <div className="ml-3">
+                <div className="ml-3 flex-1">
                   <p className="text-sm font-medium">{user?.name}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
@@ -135,7 +138,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start glass-button rounded-xl"
                 onClick={signOut}
               >
                 <LogOut className="w-4 h-4 mr-2" />
@@ -146,11 +149,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </Sidebar>
 
         <div className="flex flex-col flex-1 w-full">
-          <header className="flex items-center justify-between px-6 py-4 border-b border-border h-16">
+          <header className="flex items-center justify-between px-6 py-4 glass-surface border-b backdrop-blur-xl h-16">
             <div className="flex items-center">
-              <SidebarTrigger />
+              <SidebarTrigger className="glass-button rounded-lg" />
               <div className="ml-4">
-                <h1 className="text-xl font-medium">
+                <h1 className="text-xl font-semibold">
                   {navigationItems.find(
                     (item) => item.path === location.pathname
                   )?.title || "ComplainHub"}
@@ -158,8 +161,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               </div>
             </div>
             
-            <div className="flex items-center">
-              <ProfileMenu />
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
             </div>
           </header>
           
